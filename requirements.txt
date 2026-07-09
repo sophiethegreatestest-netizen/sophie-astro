@@ -1,0 +1,13 @@
+# Web framework
+flask
+flask-cors
+
+# Production WSGI server
+gunicorn
+
+# ISS tracking
+ISS-Info
+requests        # ISS-Info dependency (explicit pin for reliability)
+
+# Reverse geocoding (lat/lon -> city/country, works offline)
+reverse_geocoder
