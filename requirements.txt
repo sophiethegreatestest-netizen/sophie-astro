@@ -1,13 +1,5 @@
-# Web framework
-flask
-flask-cors
-
-# Production WSGI server
-gunicorn
-
-# ISS tracking
-ISS-Info
-requests        # ISS-Info dependency (explicit pin for reliability)
-
-# Reverse geocoding (lat/lon -> city/country, works offline)
-reverse_geocoder
+Flask>=3.0,<4.0
+skyfield>=1.49,<2.0
+requests>=2.31,<3.0
+timezonefinder>=6.5,<9.0
+gunicorn>=22.0,<27.0
