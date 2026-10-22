@@ -10,7 +10,6 @@ TLE (orbital element) data is fetched from Celestrak and cached in memory,
 refreshed every 2 hours. If the fetch fails and we have no cached TLE yet,
 the API returns a 503 rather than inventing fake orbital data.
 """
-print("BANANABANANABANANA")
 import time
 import threading
 from datetime import timedelta
