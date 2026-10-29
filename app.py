@@ -34,25 +34,42 @@ _tle_last_fetch = 0
 _tle_last_error = None
 
 
+TLE_SOURCES = [
+    "https://celestrak.org/NORAD/elements/gp.php?CATNR=25544&FORMAT=TLE",
+    "https://api.wheretheiss.at/v1/satellites/25544/tles?format=text",
+]
+TLE_HEADERS = {"User-Agent": "iss-tracker-app/1.0 (educational project)"}
+
+
+def _fetch_tle():
+    last_exc = None
+    for url in TLE_SOURCES:
+        try:
+            resp = requests.get(url, headers=TLE_HEADERS, timeout=10)
+            resp.raise_for_status()
+            lines = [l.strip() for l in resp.text.splitlines() if l.strip()]
+            line1 = next(l for l in lines if l.startswith("1 "))
+            line2 = next(l for l in lines if l.startswith("2 "))
+            return EarthSatellite(line1, line2, "ISS (ZARYA)", ts)
+        except Exception as exc:  # noqa: BLE001
+            print(f"TLE fetch failed from {url}: {exc}", flush=True)
+            last_exc = exc
+    raise last_exc
+
+
 def get_satellite():
-    """Return a cached EarthSatellite, refreshing from Celestrak periodically."""
-    global _satellite, _tle_last_fetch, _tle_last_error
+    """Return a cached EarthSatellite, refreshing periodically."""
+    global _satellite, _tle_last_fetch
     with _tle_lock:
         stale = (time.time() - _tle_last_fetch) > TLE_REFRESH_SECONDS
         if _satellite is None or stale:
             try:
-                resp = requests.get(TLE_URL, timeout=10)
-                resp.raise_for_status()
-                lines = [l for l in resp.text.strip().splitlines() if l.strip()]
-                name, line1, line2 = lines[0], lines[1], lines[2]
-                _satellite = EarthSatellite(line1, line2, name, ts)
+                _satellite = _fetch_tle()
                 _tle_last_fetch = time.time()
-                _tle_last_error = None
-            except Exception as exc:  # noqa: BLE001
-                _tle_last_error = str(exc)
+            except Exception:
                 if _satellite is None:
                     raise
-                # keep serving the stale satellite object rather than fail outright
+                # keep serving the stale satellite rather than fail outright
         return _satellite
 
 
